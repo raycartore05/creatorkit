@@ -23,6 +23,8 @@ export const site = {
   origin: 'https://creator.rayore.co.nz',
   parentName: 'RayOre',
   parentUrl: 'https://rayore.co.nz',
+  /** Voluntary support link (PayPal.Me). A plain external link: no SDK, no tracking. */
+  supportUrl: 'https://paypal.me/RaycartOre',
   locale: 'en_NZ',
   contactEmail,
   googleSiteVerification: clean(env.VITE_GOOGLE_SITE_VERIFICATION),

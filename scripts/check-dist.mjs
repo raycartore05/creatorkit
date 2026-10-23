@@ -75,6 +75,7 @@ for (const f of files.filter((x) => /\.(js|html|css|txt|xml|json|webmanifest)$/.
     problems.push(`${rel}: looks like it contains a secret`);
   }
   if (/[\w.+-]+@gmail\.com/i.test(text)) problems.push(`${rel}: contains a personal @gmail.com address (only the public support address should appear)`);
+  if (/paypal\.com\/sdk|paypalobjects\.com|braintreegateway|js\.stripe\.com/i.test(text)) problems.push(`${rel}: payment SDK reference found (only a plain PayPal.Me link is allowed)`);
   if (!adsOn && /googlesyndication\.com\/pagead\/js/.test(text) && !rel.startsWith('assets/')) {
     problems.push(`${rel}: AdSense script present while ads are disabled`);
   }

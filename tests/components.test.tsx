@@ -2,6 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { within } from '@testing-library/react';
 import App from '../src/App';
 import { CaptionFormatter } from '../src/tools/CaptionFormatter';
 import { OgPreview } from '../src/tools/OgPreview';
@@ -151,5 +154,127 @@ describe('routing and pages', () => {
   it('image tools show an upload prompt before a file is chosen', () => {
     at('/tools/image-resizer');
     expect(screen.getByText('Choose an image')).toBeInTheDocument();
+  });
+});
+
+const NAV = [
+  ['Resize', '/tools/image-resizer'],
+  ['Compress', '/tools/image-compressor'],
+  ['Crop', '/tools/profile-cropper'],
+  ['QR Code', '/tools/qr-code-generator'],
+  ['Social Preview', '/tools/og-preview'],
+  ['Captions', '/tools/caption-formatter'],
+  ['Watermark', '/tools/watermark'],
+] as const;
+const PAYPAL = 'https://paypal.me/RaycartOre';
+
+describe('header navigation', () => {
+  it('has a dedicated link for each of the seven tools plus All Tools, with no duplicates', () => {
+    at('/');
+    const nav = screen.getByRole('navigation', { name: 'Main' });
+    const links = within(nav).getAllByRole('link');
+    expect(links.map((l) => [l.textContent, l.getAttribute('href')])).toEqual([...NAV, ['All Tools', '/#tools']]);
+    expect(new Set(links.map((l) => l.getAttribute('href'))).size).toBe(links.length);
+  });
+  it('logo links to the homepage', () => {
+    at('/tools/watermark');
+    const logos = screen.getAllByRole('link', { name: 'CreatorKit home' });
+    for (const l of logos) expect(l).toHaveAttribute('href', '/');
+  });
+  it.each(NAV)('marks %s as the current page on its route', (label, path) => {
+    at(path);
+    const nav = screen.getByRole('navigation', { name: 'Main' });
+    expect(within(nav).getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
+    const others = within(nav).getAllByRole('link').filter((l) => l.textContent !== label);
+    for (const o of others) expect(o).not.toHaveAttribute('aria-current');
+  });
+  it('navigates client-side when a tool link is clicked', async () => {
+    const user = userEvent.setup();
+    at('/');
+    await user.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('link', { name: 'Captions' }));
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Caption & Text Formatter');
+  });
+});
+
+describe('mobile menu', () => {
+  it('opens, lists every tool and All Tools, and reports its state', async () => {
+    const user = userEvent.setup();
+    at('/');
+    const btn = screen.getByRole('button', { name: 'Menu' });
+    expect(btn).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('navigation', { name: 'Mobile' })).toBeNull();
+    await user.click(btn);
+    expect(btn).toHaveAttribute('aria-expanded', 'true');
+    expect(btn).toHaveAccessibleName('Close menu');
+    const menu = screen.getByRole('navigation', { name: 'Mobile' });
+    const hrefs = within(menu).getAllByRole('link').map((l) => l.getAttribute('href'));
+    for (const [, path] of NAV) expect(hrefs).toContain(path);
+    expect(hrefs).toContain('/#tools');
+    expect(hrefs).toContain('/guides/social-media-image-sizes');
+  });
+  it('closes with Escape and returns focus to the button', async () => {
+    const user = userEvent.setup();
+    at('/');
+    await user.click(screen.getByRole('button', { name: 'Menu' }));
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('navigation', { name: 'Mobile' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Menu' })).toHaveFocus();
+  });
+  it('closes after choosing a destination, including the current page', async () => {
+    const user = userEvent.setup();
+    at('/tools/watermark');
+    await user.click(screen.getByRole('button', { name: 'Menu' }));
+    await user.click(within(screen.getByRole('navigation', { name: 'Mobile' })).getByRole('link', { name: /Watermark/ }));
+    expect(screen.queryByRole('navigation', { name: 'Mobile' })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Menu' }));
+    await user.click(within(screen.getByRole('navigation', { name: 'Mobile' })).getByRole('link', { name: /Compress/ }));
+    expect(screen.queryByRole('navigation', { name: 'Mobile' })).toBeNull();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Image Compressor');
+  });
+});
+
+describe('voluntary PayPal support', () => {
+  it('footer link uses the exact PayPal.Me URL and safe new-tab attributes', () => {
+    at('/tools/image-resizer');
+    const link = screen.getByTestId('footer-support');
+    expect(link).toHaveAttribute('href', PAYPAL);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link).toHaveAccessibleName('Support CreatorKit (PayPal, opens in a new tab)');
+  });
+  it('About page has an optional support section with the PayPal button', () => {
+    at('/about');
+    const section = screen.getByTestId('about-support');
+    expect(within(section).getByRole('heading', { name: 'Support CreatorKit' })).toBeInTheDocument();
+    expect(section).toHaveTextContent('entirely voluntary');
+    expect(section).toHaveTextContent('remain free to use, whether or not you contribute');
+    const btn = within(section).getByRole('link', { name: /Support CreatorKit on PayPal/ });
+    expect(btn).toHaveAttribute('href', PAYPAL);
+    expect(btn).toHaveAttribute('target', '_blank');
+    expect(btn).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+  it('support links appear only in the footer and About page, never as a dialog or on tool content', () => {
+    at('/tools/qr-code-generator');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.querySelectorAll(`a[href="${PAYPAL}"]`)).toHaveLength(1);
+    expect(screen.getByRole('main').querySelector(`a[href="${PAYPAL}"]`)).toBeNull();
+  });
+  it('privacy policy explains the PayPal link without claiming to collect payment details', () => {
+    at('/privacy');
+    expect(screen.getByRole('heading', { name: 'Optional support through PayPal' })).toBeInTheDocument();
+    expect(screen.getByText(/does not receive your card or bank details/)).toBeInTheDocument();
+  });
+  it('adds no payment SDK dependency', () => {
+    const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8'));
+    const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
+    expect(deps.filter((d) => /paypal|braintree|stripe/i.test(d))).toEqual([]);
+  });
+});
+
+describe('support email unchanged', () => {
+  it('contact page and footer still use the support address', () => {
+    at('/contact');
+    expect(screen.getByTestId('support-email')).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
+    expect(screen.getByTestId('footer-email')).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
   });
 });

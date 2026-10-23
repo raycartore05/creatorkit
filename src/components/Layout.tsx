@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { site } from '../config/site';
-import { TOOLS } from '../data/tools';
+import { ALL_TOOLS_PATH, TOOLS } from '../data/tools';
+import { Icon } from './Icon';
 
 function Logo() {
   return (
@@ -18,40 +19,75 @@ function Logo() {
 function Header() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const buttonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  // The current page gets accent colour plus an underline, so it isn't signalled by colour alone.
   const navCls = ({ isActive }: { isActive: boolean }) =>
-    `rounded-md px-3 py-2 text-sm font-medium no-underline ${isActive ? 'text-accent' : 'text-ink hover:text-accent'}`;
+    `whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-medium no-underline xl:px-3 ${
+      isActive ? 'text-accent shadow-[inset_0_-2px_0_var(--color-accent)]' : 'text-ink hover:bg-accent-soft hover:text-accent'
+    }`;
+  const mobileCls = ({ isActive }: { isActive: boolean }) =>
+    `flex min-h-12 items-center gap-3 rounded-lg px-3 no-underline ${isActive ? 'bg-accent-soft font-semibold text-accent' : 'text-ink hover:bg-accent-soft'}`;
+
   return (
     <header className="border-b border-line bg-surface">
       <div className="wrap flex h-16 items-center justify-between gap-4">
         <Logo />
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-          <NavLink to="/tools/image-resizer" className={navCls}>Resize</NavLink>
-          <NavLink to="/tools/image-compressor" className={navCls}>Compress</NavLink>
-          <NavLink to="/tools/qr-code-generator" className={navCls}>QR code</NavLink>
-          <NavLink to="/guides/social-media-image-sizes" className={navCls}>Image sizes</NavLink>
-          <Link to="/#tools" className="btn-secondary ml-2">All tools</Link>
+        <nav aria-label="Main" className="hidden items-center gap-0.5 lg:flex">
+          {TOOLS.map((t) => (
+            <NavLink key={t.slug} to={t.path} className={navCls} title={t.name}>
+              {t.navLabel}
+            </NavLink>
+          ))}
+          <Link to={ALL_TOOLS_PATH} className="btn-secondary ml-2 whitespace-nowrap">All Tools</Link>
         </nav>
         <button
+          ref={buttonRef}
           type="button"
-          className="btn-quiet md:hidden"
+          className="btn-secondary lg:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           onClick={() => setOpen((o) => !o)}
         >
-          {open ? 'Close' : 'Menu'}
+          <span aria-hidden="true" className="text-base leading-none">{open ? '×' : '☰'}</span>
+          {open ? 'Close menu' : 'Menu'}
         </button>
       </div>
       {open && (
-        <nav id="mobile-nav" aria-label="Mobile" className="border-t border-line md:hidden">
-          <ul className="wrap py-2">
+        <nav id="mobile-nav" aria-label="Mobile" className="border-t border-line lg:hidden">
+          <ul className="wrap grid gap-1 py-3 sm:grid-cols-2">
             {TOOLS.map((t) => (
               <li key={t.slug}>
-                <Link to={t.path} className="block py-3 text-ink no-underline">{t.name}</Link>
+                <NavLink to={t.path} className={mobileCls} onClick={() => setOpen(false)}>
+                  <Icon name={t.icon} className="h-5 w-5 shrink-0 text-accent" />
+                  <span>
+                    <span className="block text-sm font-semibold">{t.navLabel}</span>
+                    <span className="block text-xs text-muted">{t.name}</span>
+                  </span>
+                </NavLink>
               </li>
             ))}
             <li>
-              <Link to="/guides/social-media-image-sizes" className="block py-3 text-ink no-underline">Image sizes guide</Link>
+              <Link to={ALL_TOOLS_PATH} className="flex min-h-12 items-center rounded-lg px-3 font-semibold text-accent no-underline hover:bg-accent-soft" onClick={() => setOpen(false)}>
+                All Tools
+              </Link>
+            </li>
+            <li>
+              <NavLink to="/guides/social-media-image-sizes" className={mobileCls} onClick={() => setOpen(false)}>
+                Image sizes guide
+              </NavLink>
             </li>
           </ul>
         </nav>
@@ -91,6 +127,19 @@ function Footer() {
                 </a>
               </li>
             )}
+            <li>
+              <a
+                href={site.supportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-muted no-underline hover:text-accent"
+                data-testid="footer-support"
+              >
+                Support CreatorKit
+                <Icon name="external" className="h-3.5 w-3.5" />
+                <span className="sr-only">(PayPal, opens in a new tab)</span>
+              </a>
+            </li>
             <li><Link to="/privacy" className="text-muted no-underline hover:text-accent">Privacy policy</Link></li>
             <li><Link to="/terms" className="text-muted no-underline hover:text-accent">Terms of use</Link></li>
           </ul>

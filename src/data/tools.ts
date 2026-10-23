@@ -2,6 +2,8 @@ export interface ToolInfo {
   slug: string;
   path: string;
   name: string;
+  /** Short label used in the header navigation. */
+  navLabel: string;
   short: string;
   keywords: string[];
   icon: IconName;
@@ -14,6 +16,7 @@ export const TOOLS: ToolInfo[] = [
   {
     slug: 'image-resizer',
     path: '/tools/image-resizer',
+    navLabel: 'Resize',
     name: 'Social Media Image Resizer',
     short: 'Resize and crop images to post, story, cover and thumbnail sizes, or any custom size.',
     keywords: ['resize', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok', 'thumbnail', 'banner', 'crop', 'dimensions'],
@@ -23,6 +26,7 @@ export const TOOLS: ToolInfo[] = [
   {
     slug: 'image-compressor',
     path: '/tools/image-compressor',
+    navLabel: 'Compress',
     name: 'Image Compressor',
     short: 'Shrink JPEG, PNG and WebP files with a quality slider or a target file size.',
     keywords: ['compress', 'reduce', 'file size', 'kb', 'jpeg', 'png', 'webp', 'optimize', 'smaller'],
@@ -32,6 +36,7 @@ export const TOOLS: ToolInfo[] = [
   {
     slug: 'profile-cropper',
     path: '/tools/profile-cropper',
+    navLabel: 'Crop',
     name: 'Profile Picture & Cover Cropper',
     short: 'Drag and zoom to frame a profile picture with a circle preview, or crop a cover banner.',
     keywords: ['profile picture', 'avatar', 'circle', 'crop', 'cover', 'banner', 'header', 'pfp'],
@@ -41,6 +46,7 @@ export const TOOLS: ToolInfo[] = [
   {
     slug: 'qr-code-generator',
     path: '/tools/qr-code-generator',
+    navLabel: 'QR Code',
     name: 'QR Code Generator',
     short: 'Make a QR code for a link or text, pick colours and size, and download PNG or SVG.',
     keywords: ['qr', 'qr code', 'barcode', 'link', 'url', 'print', 'menu', 'poster'],
@@ -50,6 +56,7 @@ export const TOOLS: ToolInfo[] = [
   {
     slug: 'og-preview',
     path: '/tools/og-preview',
+    navLabel: 'Social Preview',
     name: 'Social Sharing Preview',
     short: 'Draft a link preview card and copy ready-made Open Graph meta tags.',
     keywords: ['open graph', 'og', 'meta tags', 'link preview', 'share card', 'twitter card', 'seo'],
@@ -59,6 +66,7 @@ export const TOOLS: ToolInfo[] = [
   {
     slug: 'caption-formatter',
     path: '/tools/caption-formatter',
+    navLabel: 'Captions',
     name: 'Caption & Text Formatter',
     short: 'Count characters and words, tidy whitespace and clean up hashtags before you post.',
     keywords: ['character count', 'word count', 'caption', 'hashtag', 'whitespace', 'line breaks', 'counter'],
@@ -68,6 +76,7 @@ export const TOOLS: ToolInfo[] = [
   {
     slug: 'watermark',
     path: '/tools/watermark',
+    navLabel: 'Watermark',
     name: 'Image Watermark Tool',
     short: 'Add a text watermark with position, opacity, size, rotation and tiling controls.',
     keywords: ['watermark', 'copyright', 'text on image', 'logo', 'protect', 'brand'],
@@ -75,6 +84,9 @@ export const TOOLS: ToolInfo[] = [
     related: ['image-resizer', 'image-compressor', 'profile-cropper'],
   },
 ];
+
+/** Homepage section that lists every tool (the "All Tools" directory). */
+export const ALL_TOOLS_PATH = '/#tools';
 
 export function toolBySlug(slug: string): ToolInfo {
   const t = TOOLS.find((x) => x.slug === slug);

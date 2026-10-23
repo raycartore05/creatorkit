@@ -1,7 +1,7 @@
 import type { IconName } from '../data/tools';
 
 /** Small inline SVG icon set, drawn for CreatorKit (no icon library). */
-const PATHS: Record<IconName | 'upload' | 'download' | 'copy' | 'reset' | 'check' | 'alert' | 'search' | 'info', string> = {
+const PATHS: Record<IconName | 'upload' | 'download' | 'copy' | 'reset' | 'check' | 'alert' | 'search' | 'info' | 'external', string> = {
   resize: 'M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6M14 4h6v6M10 20H4v-6',
   compress: 'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7',
   crop: 'M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2',
@@ -16,6 +16,7 @@ const PATHS: Record<IconName | 'upload' | 'download' | 'copy' | 'reset' | 'check
   check: 'M5 12l5 5 9-10',
   alert: 'M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
   search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
+  external: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',
 };
 

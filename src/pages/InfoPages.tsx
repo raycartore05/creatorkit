@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { adsEnabled, site } from '../config/site';
 import { groupByPlatform, PRESETS_CHECKED_ON, PROFILE_PRESETS, SOCIAL_PRESETS } from '../data/presets';
+import { Icon } from '../components/Icon';
 import { Seo } from '../components/Seo';
 import { aspectLabel } from '../lib/format';
 import { breadcrumbSchema } from '../lib/seo';
@@ -113,6 +114,20 @@ export function AboutPage() {
       <p>
         CreatorKit is free. To cover running costs it may in future show advertising, which will always be clearly labelled and kept away from tool controls. {adsEnabled ? 'Advertising is currently enabled; see the privacy policy for details.' : 'There is currently no advertising on the site.'}
       </p>
+      <section aria-labelledby="support-h" className="mt-10 rounded-xl border border-line bg-surface p-5" data-testid="about-support">
+        <h2 id="support-h" className="!mt-0">Support CreatorKit</h2>
+        <p>
+          Enjoying CreatorKit? If these free tools save you time, you can optionally support the project to help with ongoing development and maintenance.
+        </p>
+        <p>Your support is entirely voluntary. All CreatorKit tools remain free to use, whether or not you contribute.</p>
+        <p className="!mb-0">
+          <a href={site.supportUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" data-testid="about-support-link">
+            Support CreatorKit on PayPal
+            <Icon name="external" className="h-4 w-4" />
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+        </p>
+      </section>
       <h2>Feedback</h2>
       <p>
         Found a bug, a size that has changed, or a tool you would like to see? Please <Link to="/contact">get in touch</Link>.
@@ -199,6 +214,10 @@ export function PrivacyPage() {
           CreatorKit currently shows no advertising and loads no advertising code. If advertising is introduced, this policy will be updated before it starts, including the information that ad providers collect and how to opt out.
         </p>
       )}
+      <h2>Optional support through PayPal</h2>
+      <p>
+        The “Support CreatorKit” links take you to PayPal’s own website. CreatorKit does not process payments, does not receive your card or bank details, and does not track whether you follow the link. Anything you enter on PayPal is handled by PayPal under its own privacy statement. Contributing is optional and has no effect on what you can use on CreatorKit.
+      </p>
       <h2>If you contact us</h2>
       <p>
         Contacting us is optional. If you email <ContactLine />, you choose what to share: we receive your email address, your name if your email provider includes it, and whatever you write or attach. The message is sent by your own email provider and forwarded to our inbox through Cloudflare’s email routing service. We use it only to reply and to improve CreatorKit, and we delete messages when they are no longer needed. Please do not send private images.

@@ -109,5 +109,6 @@ test('mobile menu opens and lists all tools @mobile', async ({ page, isMobile })
   test.skip(!isMobile, 'mobile only');
   await page.goto('/');
   await page.getByRole('button', { name: 'Menu' }).click();
-  await expect(page.locator('#mobile-nav li')).toHaveCount(8);
+  // 7 tools + All Tools + Image sizes guide (was 7 tools + guide before All Tools was added to the menu).
+  await expect(page.locator('#mobile-nav li')).toHaveCount(9);
 });
