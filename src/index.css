@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque/wght.css';
+
+@theme {
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --color-paper: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-ink: #171a2b;
+  --color-muted: #535a70;
+  --color-line: #dfe3ec;
+  --color-accent: #4338ca;
+  --color-accent-strong: #3730a3;
+  --color-accent-soft: #eef0ff;
+  --color-ok: #0f7a55;
+  --color-ok-soft: #e7f6ef;
+  --color-warn: #8a5300;
+  --color-warn-soft: #fff4e0;
+  --color-bad: #b42318;
+  --color-bad-soft: #fdecea;
+}
+
+@utility btn {
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold no-underline transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display text-ink;
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+  /* In-text links are underlined so they don't rely on colour alone (WCAG 1.4.1). */
+  a {
+    @apply text-accent underline decoration-1 underline-offset-2;
+  }
+  a:hover {
+    @apply text-accent-strong;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background: var(--color-accent-soft);
+  }
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white hover:bg-accent-strong hover:text-white;
+  }
+  .btn-secondary {
+    @apply btn border border-line bg-surface text-ink hover:border-accent hover:text-accent;
+  }
+  .btn-quiet {
+    @apply btn text-muted hover:text-ink;
+  }
+  .field-label {
+    @apply mb-1 block text-sm font-semibold text-ink;
+  }
+  .field-hint {
+    @apply mt-1 text-sm text-muted;
+  }
+  .input {
+    @apply block min-h-11 w-full rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink placeholder:text-muted/70 focus:border-accent;
+  }
+  .panel {
+    @apply rounded-xl border border-line bg-surface;
+  }
+  .prose-ck {
+    @apply max-w-[70ch] text-[1.02rem];
+  }
+  .prose-ck h2 {
+    @apply mt-10 mb-3 text-2xl font-semibold;
+  }
+  .prose-ck h3 {
+    @apply mt-6 mb-2 text-lg font-semibold;
+  }
+  .prose-ck p {
+    @apply my-3;
+  }
+  .prose-ck ul,
+  .prose-ck ol {
+    @apply my-3 pl-5;
+  }
+  .prose-ck ul {
+    @apply list-disc;
+  }
+  .prose-ck ol {
+    @apply list-decimal;
+  }
+  .prose-ck li {
+    @apply my-1;
+  }
+  .prose-ck table {
+    @apply my-4 w-full border-collapse text-sm;
+  }
+  .prose-ck th,
+  .prose-ck td {
+    @apply border-b border-line px-2 py-2 text-left align-top;
+  }
+  .prose-ck code {
+    @apply rounded bg-accent-soft px-1 py-0.5 text-[0.9em];
+  }
+  /* Checkerboard behind previews so transparent pixels are visible. */
+  .checker {
+    background-color: #fff;
+    background-image:
+      linear-gradient(45deg, #e5e7ef 25%, transparent 25%),
+      linear-gradient(-45deg, #e5e7ef 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e5e7ef 75%),
+      linear-gradient(-45deg, transparent 75%, #e5e7ef 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+  /* Crop-mark corners: the site's visual signature. */
+  .cropmarks {
+    position: relative;
+  }
+  .cropmarks::before,
+  .cropmarks::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--color-accent);
+    pointer-events: none;
+  }
+  .cropmarks::before {
+    top: -6px;
+    left: -6px;
+    border-top: 2px solid;
+    border-left: 2px solid;
+  }
+  .cropmarks::after {
+    bottom: -6px;
+    right: -6px;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+  }
+  input[type='range'] {
+    accent-color: var(--color-accent);
+    @apply h-11 w-full cursor-pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

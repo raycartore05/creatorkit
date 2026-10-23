@@ -1,0 +1,13 @@
+{
+  "name": "CreatorKit",
+  "short_name": "CreatorKit",
+  "description": "Free browser-based tools for resizing, compressing and preparing social content.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8fa",
+  "theme_color": "#4338ca",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
