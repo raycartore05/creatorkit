@@ -11,9 +11,11 @@ function clean(v: unknown): string {
 const adsenseClientRaw = clean(env.VITE_ADSENSE_CLIENT);
 const adsenseClient = /^ca-pub-\d{10,20}$/.test(adsenseClientRaw) ? adsenseClientRaw : '';
 const adsenseSlot = /^\d{6,20}$/.test(clean(env.VITE_ADSENSE_SLOT)) ? clean(env.VITE_ADSENSE_SLOT) : '';
+/** Public support address (Cloudflare Email Routing). VITE_CONTACT_EMAIL can override it. */
+export const SUPPORT_EMAIL = 'creatorkit-support@rayore.co.nz';
 const contactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean(env.VITE_CONTACT_EMAIL))
   ? clean(env.VITE_CONTACT_EMAIL)
-  : '';
+  : SUPPORT_EMAIL;
 
 export const site = {
   name: 'CreatorKit',

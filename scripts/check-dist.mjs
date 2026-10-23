@@ -74,6 +74,7 @@ for (const f of files.filter((x) => /\.(js|html|css|txt|xml|json|webmanifest)$/.
   if (/(?:sk|pk|rk)_(?:live|test)_[A-Za-z0-9]{10,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY|xox[baprs]-[A-Za-z0-9-]{10,}/.test(text)) {
     problems.push(`${rel}: looks like it contains a secret`);
   }
+  if (/[\w.+-]+@gmail\.com/i.test(text)) problems.push(`${rel}: contains a personal @gmail.com address (only the public support address should appear)`);
   if (!adsOn && /googlesyndication\.com\/pagead\/js/.test(text) && !rel.startsWith('assets/')) {
     problems.push(`${rel}: AdSense script present while ads are disabled`);
   }

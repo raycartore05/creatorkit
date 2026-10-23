@@ -123,11 +123,17 @@ export function AboutPage() {
 
 export function ContactPage() {
   return (
-    <Page path="/contact" title="Contact">
+    <Page path="/contact" title="Contact CreatorKit Support">
       {site.contactEmail ? (
-        <p>
-          Email <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>. We read every message, though we cannot always reply quickly.
-        </p>
+        <>
+          <p>
+            Email us at{' '}
+            <a href={`mailto:${site.contactEmail}`} data-testid="support-email">{site.contactEmail}</a>
+          </p>
+          <p>
+            Get in touch about problems with a tool, technical issues on your device or browser, accessibility barriers, or general feedback and ideas. We read every message, though we can’t promise a reply to each one.
+          </p>
+        </>
       ) : (
         <p data-testid="contact-missing">An email contact address is being set up and will be published here shortly.</p>
       )}
@@ -139,6 +145,10 @@ export function ContactPage() {
         <li>Any error message shown.</li>
         <li>The size and type of the file (for example “4 MB JPEG”). Please do not send private images.</li>
       </ul>
+      <h2>Accessibility</h2>
+      <p>
+        If something on CreatorKit is hard to use with a screen reader, keyboard, zoom or other assistive technology, please tell us what you were trying to do and what got in the way, so we can fix it.
+      </p>
       <h2>Suggestions</h2>
       <p>
         If a platform has changed a recommended size, or you would like a new tool, let us know. Links to the official source are especially useful.
@@ -191,7 +201,7 @@ export function PrivacyPage() {
       )}
       <h2>If you contact us</h2>
       <p>
-        If you email us, we receive your email address and whatever you include in your message. We use it only to reply and to improve CreatorKit, and we delete messages when they are no longer needed. Please do not send private images.
+        Contacting us is optional. If you email <ContactLine />, you choose what to share: we receive your email address, your name if your email provider includes it, and whatever you write or attach. The message is sent by your own email provider and forwarded to our inbox through Cloudflare’s email routing service. We use it only to reply and to improve CreatorKit, and we delete messages when they are no longer needed. Please do not send private images.
       </p>
       <h2>Your rights</h2>
       <p>

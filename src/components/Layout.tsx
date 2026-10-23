@@ -84,6 +84,13 @@ function Footer() {
             <li><Link to="/guides/social-media-image-sizes" className="text-muted no-underline hover:text-accent">Social media image sizes</Link></li>
             <li><Link to="/about" className="text-muted no-underline hover:text-accent">About</Link></li>
             <li><Link to="/contact" className="text-muted no-underline hover:text-accent">Contact</Link></li>
+            {site.contactEmail && (
+              <li>
+                <a href={`mailto:${site.contactEmail}`} className="break-all text-muted no-underline hover:text-accent" data-testid="footer-email">
+                  {site.contactEmail}
+                </a>
+              </li>
+            )}
             <li><Link to="/privacy" className="text-muted no-underline hover:text-accent">Privacy policy</Link></li>
             <li><Link to="/terms" className="text-muted no-underline hover:text-accent">Terms of use</Link></li>
           </ul>

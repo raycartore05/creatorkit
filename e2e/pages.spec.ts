@@ -39,6 +39,19 @@ for (const path of PAGES) {
   });
 }
 
+test('support email links are correct on the contact page and footer @mobile', async ({ page }) => {
+  await page.goto('/contact');
+  const main = page.getByTestId('support-email');
+  await expect(main).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
+  await expect(main).toBeVisible();
+  await page.goto('/tools/qr-code-generator');
+  const footer = page.getByTestId('footer-email');
+  await footer.scrollIntoViewIfNeeded();
+  await expect(footer).toBeVisible();
+  await expect(footer).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
+  await expectNoHorizontalScroll(page);
+});
+
 test('unknown URL returns 404 with a helpful page and noindex', async ({ page }) => {
   const res = await page.goto('/no-such-page');
   expect(res?.status()).toBe(404);

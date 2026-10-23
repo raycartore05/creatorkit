@@ -13,7 +13,7 @@ independently verified · 👤 requires Ray's action · ⛔ blocked · ⬜ not i
 | Security & privacy review | ✅ | 0 npm audit findings; no secrets; CSP `script-src 'self'`; no third-party requests during any tool flow (asserted in tests) |
 | Performance review | ☑️ | Main JS 125 KB gzip, CSS 6.6 KB gzip, QR library lazy-loaded; prerendered HTML. Lighthouse/Core Web Vitals not measured yet (needs live URL) |
 | About, Privacy, Terms pages | ✅ | Privacy policy matches the implementation (no cookies, analytics or ads) |
-| Contact page | 👤 | Needs a real address: set `VITE_CONTACT_EMAIL` |
+| Contact page | ✅ | Shows creatorkit-support@rayore.co.nz (Cloudflare Email Routing). Send a test email to confirm delivery |
 | robots.txt, sitemap.xml, canonical, OG tags | ✅ | Generated at build; checked by `check:dist` and e2e |
 | GitHub repository | 👤 | Create `raycartore05/creatorkit` (or sign in to GitHub in the desktop app's browser) |
 | Cloudflare Pages project + `creator.rayore.co.nz` | ⛔ | No Cloudflare access in this session |
@@ -32,7 +32,7 @@ independently verified · 👤 requires Ray's action · ⛔ blocked · ⬜ not i
 2. Project name `creatorkit`, production branch `main`, framework preset None,
    build command `npm run build`, output directory `dist`.
 3. Environment variables (Production): `NODE_VERSION=22`,
-   `VITE_CONTACT_EMAIL=<your address>`.
+   (`VITE_CONTACT_EMAIL` is optional; it overrides the built-in support address.)
 4. Save and deploy. Then Custom domains › Set up › `creator.rayore.co.nz`.
    - If rayore.co.nz uses Cloudflare nameservers, Cloudflare adds the
      `creator` CNAME automatically.

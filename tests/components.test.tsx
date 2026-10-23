@@ -130,6 +130,24 @@ describe('routing and pages', () => {
     at('/privacy');
     expect(screen.getByText(/currently shows no advertising/)).toBeInTheDocument();
   });
+  it('contact page shows the support email as a mailto link', () => {
+    at('/contact');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Contact CreatorKit Support');
+    const link = screen.getByTestId('support-email');
+    expect(link).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
+    expect(link).toHaveTextContent('creatorkit-support@rayore.co.nz');
+    expect(screen.queryByTestId('contact-missing')).toBeNull();
+    expect(screen.getByText(/accessibility barriers/)).toBeInTheDocument();
+  });
+  it('footer shows the support email on tool pages', () => {
+    at('/tools/image-resizer');
+    expect(screen.getByTestId('footer-email')).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
+  });
+  it('privacy policy explains what is shared when emailing support', () => {
+    at('/privacy');
+    expect(screen.getByText(/Contacting us is optional/)).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'creatorkit-support@rayore.co.nz' }).length).toBeGreaterThan(0);
+  });
   it('image tools show an upload prompt before a file is chosen', () => {
     at('/tools/image-resizer');
     expect(screen.getByText('Choose an image')).toBeInTheDocument();

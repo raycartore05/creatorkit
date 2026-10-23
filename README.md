@@ -49,7 +49,7 @@ public: never put secrets in them.
 
 | Variable | Purpose |
 |---|---|
-| `VITE_CONTACT_EMAIL` | Address shown on /contact, /privacy, /terms. **Required before AdSense review.** |
+| `VITE_CONTACT_EMAIL` | Optional override for the support address (default `creatorkit-support@rayore.co.nz`, set in `src/config/site.ts`). |
 | `VITE_GOOGLE_SITE_VERIFICATION` | Search Console HTML-tag token (homepage only). |
 | `VITE_ADSENSE_CLIENT` | `ca-pub-…` for CreatorKit's own AdSense site entry. Adds the `google-adsense-account` meta tag and `ads.txt`. Does **not** load ads. |
 | `VITE_ADS_ENABLED` | `true` loads ad code. Only after approval and a consent message for EEA/UK/CH. |
