@@ -54,7 +54,8 @@ for (const f of htmlFiles) {
   } else if (!html.includes('noindex')) problems.push('/404: should be noindex');
   if (/http:\/\/(?!www\.w3\.org)/.test(html)) problems.push(`${route}: contains an http:// (mixed-content risk) URL`);
   for (const m of html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)) {
-    if (!m[1].startsWith('/')) problems.push(`${route}: third-party script ${m[1]}`);
+    const isAdsense = m[1] === 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8644589635574920';
+    if (!m[1].startsWith('/') && !isAdsense) problems.push(`${route}: third-party script ${m[1]}`);
   }
   if (/fonts\.googleapis|fonts\.gstatic/.test(html)) problems.push(`${route}: third-party font request`);
   if (/<script(?![^>]*(type="application\/ld\+json"|src=))[^>]*>/.test(html)) problems.push(`${route}: inline script (blocked by CSP)`);
@@ -81,6 +82,33 @@ for (const f of files.filter((x) => /\.(js|html|css|txt|xml|json|webmanifest)$/.
   }
 }
 if (!adsOn && (await exists(join(dist, 'ads.txt')))) problems.push('ads.txt present while ads disabled');
+
+// AdSense: when enabled, every content page has exactly one correct script tag,
+// the 404 page has none, and ads.txt holds exactly the expected record.
+const EXPECTED_CLIENT = 'ca-pub-8644589635574920';
+const SCRIPT = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${EXPECTED_CLIENT}" crossorigin="anonymous"></script>`;
+if (adsOn) {
+  for (const f of htmlFiles) {
+    const html = await readFile(f, 'utf8');
+    const route = routeOf(f);
+    const n = (html.match(/adsbygoogle\.js/g) ?? []).length;
+    if (route === '/404') {
+      if (n !== 0) problems.push('/404: AdSense script should not be on the error page');
+      continue;
+    }
+    if (n !== 1) problems.push(`${route}: expected exactly 1 AdSense script, found ${n}`);
+    else if (!html.includes(SCRIPT)) problems.push(`${route}: AdSense script tag differs from the expected snippet`);
+    const head = html.slice(0, html.indexOf('</head>'));
+    if (!head.includes(SCRIPT)) problems.push(`${route}: AdSense script is not inside <head>`);
+    if (!head.includes(`<meta name="google-adsense-account" content="${EXPECTED_CLIENT}" />`)) problems.push(`${route}: missing google-adsense-account meta`);
+  }
+  const adsTxt = (await exists(join(dist, 'ads.txt'))) ? await readFile(join(dist, 'ads.txt'), 'utf8') : '';
+  if (adsTxt !== 'google.com, pub-8644589635574920, DIRECT, f08c47fec0942fa0\n') problems.push(`ads.txt content unexpected: ${JSON.stringify(adsTxt)}`);
+  if (!/\/ads\.txt\n {2}Content-Type: text\/plain/.test(headers)) problems.push('_headers: /ads.txt is not served as text/plain');
+  for (const f of files.filter((x) => x.endsWith('.js'))) {
+    if (/ins class="adsbygoogle"[^>]*data-ad-slot="(?!\d)/.test(await readFile(f, 'utf8'))) problems.push(`${relative(dist, f)}: ad unit without a numeric slot`);
+  }
+}
 for (const req of ['robots.txt', 'sitemap.xml', '404.html', '_headers', 'favicon.svg', 'og-image.png', 'site.webmanifest']) {
   if (!(await exists(join(dist, req)))) problems.push(`missing dist/${req}`);
 }

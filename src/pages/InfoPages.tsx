@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { adsEnabled, site } from '../config/site';
+import { adsenseScriptEnabled, site } from '../config/site';
 import { groupByPlatform, PRESETS_CHECKED_ON, PROFILE_PRESETS, SOCIAL_PRESETS } from '../data/presets';
 import { Icon } from '../components/Icon';
 import { Seo } from '../components/Seo';
@@ -112,7 +112,7 @@ export function AboutPage() {
       </p>
       <h2>How it is funded</h2>
       <p>
-        CreatorKit is free. To cover running costs it may in future show advertising, which will always be clearly labelled and kept away from tool controls. {adsEnabled ? 'Advertising is currently enabled; see the privacy policy for details.' : 'There is currently no advertising on the site.'}
+        CreatorKit is free. To cover running costs it {adsenseScriptEnabled ? 'uses Google AdSense, so pages may show advertising' : 'may in future show advertising'}. Ads are always labelled and kept away from tool controls, and no tool ever requires you to click an ad.{adsenseScriptEnabled ? ' See the privacy policy for how Google uses cookies.' : ' There is currently no advertising on the site.'}
       </p>
       <section aria-labelledby="support-h" className="mt-10 rounded-xl border border-line bg-surface p-5" data-testid="about-support">
         <h2 id="support-h" className="!mt-0">Support CreatorKit</h2>
@@ -194,19 +194,28 @@ export function PrivacyPage() {
         CreatorKit is hosted on Cloudflare Pages. Like any web host, Cloudflare processes technical information needed to deliver and protect the site, such as your IP address, browser type, the page requested and the time. This is handled by Cloudflare under its own <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">privacy policy</a>. CreatorKit does not use this information to identify you.
       </p>
       <ul>
-        <li>CreatorKit does not use analytics or tracking scripts.</li>
-        <li>CreatorKit does not set cookies and does not use browser storage (such as localStorage) for tracking.</li>
-        <li>Fonts and all page code are served from CreatorKit itself, not from third-party font or script services.</li>
+        <li>CreatorKit does not use analytics scripts.</li>
+        <li>
+          CreatorKit’s own code does not set cookies or use browser storage (such as localStorage) for tracking.
+          {adsenseScriptEnabled && ' Google’s advertising code, described below, can set and read cookies.'}
+        </li>
+        <li>
+          Fonts and CreatorKit’s own code are served from CreatorKit itself.
+          {adsenseScriptEnabled ? ' The one third-party script is Google AdSense.' : ' No third-party font or script services are used.'}
+        </li>
         <li>There are no accounts, sign-up forms or newsletters.</li>
       </ul>
       <h2>Advertising</h2>
-      {adsEnabled ? (
+      {adsenseScriptEnabled ? (
         <>
           <p>
-            CreatorKit shows advertising provided by Google AdSense. Google and other third-party vendors use cookies to serve ads based on your previous visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads based on your visits to this site and/or other sites on the internet.
+            CreatorKit uses Google AdSense to show advertising. Every page includes Google’s AdSense code, which loads from Google’s servers, so Google receives your IP address and browser information when you visit. Ads, when shown, are labelled “Advertisement”. The image and text tools still work entirely in your browser, and CreatorKit never sends your files or the text you enter to Google or anyone else.
           </p>
           <p>
-            You can opt out of personalised advertising by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>, or opt out of some third-party vendors’ use of cookies at <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer">aboutads.info</a>. Visitors in the European Economic Area, the United Kingdom and Switzerland are asked for consent through a certified consent message before personalised ads are shown. See also <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">how Google uses information from sites that use its services</a>.
+            Google and other third-party vendors use cookies to serve ads based on your previous visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads based on your visits to this site and/or other sites on the internet. Google and other third-party vendors use cookies to serve ads based on your previous visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads based on your visits to this site and/or other sites on the internet.
+          </p>
+          <p>
+            You can opt out of personalised advertising by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>, or opt out of some third-party vendors’ use of cookies at <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer">aboutads.info</a>. For visitors in the European Economic Area, the United Kingdom and Switzerland, CreatorKit uses Google’s consent message so you can choose whether personalised ads are shown. See also <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">how Google uses information from sites that use its services</a>.
           </p>
         </>
       ) : (

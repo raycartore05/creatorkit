@@ -4,19 +4,28 @@ import { join } from 'node:path';
 
 export const fixture = (name: string) => join(import.meta.dirname, 'fixtures', name);
 
-/** Records every request that leaves localhost, and every console error. */
+/** Google ad hosts. Chrome is launched with these resolving nowhere (see playwright.config.ts), so tests never reach real ad servers or create impressions. */
+export const AD_HOST = /(^|\.)(googlesyndication\.com|doubleclick\.net|googleadservices\.com|adtrafficquality\.google|fundingchoicesmessages\.google\.com)$/;
+
+/** Records every request that leaves localhost (ad requests kept separately), and every console error. */
 export function watch(page: Page) {
   const external: string[] = [];
+  const ads: string[] = [];
   const errors: string[] = [];
   page.on('request', (r) => {
     const u = new URL(r.url());
-    if (!['localhost', '127.0.0.1'].includes(u.hostname) && !['data:', 'blob:'].includes(u.protocol)) external.push(r.url());
+    if (['data:', 'blob:'].includes(u.protocol) || ['localhost', '127.0.0.1'].includes(u.hostname)) return;
+    (AD_HOST.test(u.hostname) ? ads : external).push(r.url());
   });
   page.on('console', (m) => {
-    if (m.type() === 'error') errors.push(m.text());
+    if (m.type() !== 'error') return;
+    // The blocked AdSense script reports a load failure; that is expected in tests.
+    const src = m.location().url;
+    if (src && AD_HOST.test(new URL(src).hostname)) return;
+    errors.push(m.text());
   });
   page.on('pageerror', (e) => errors.push(e.message));
-  return { external, errors };
+  return { external, ads, errors };
 }
 
 export async function upload(page: Page, name: string) {

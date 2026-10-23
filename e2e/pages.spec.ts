@@ -76,19 +76,56 @@ test('sitemap, robots and security headers', async ({ request }) => {
   expect(sitemap).not.toContain('404');
   const home = await request.get('/');
   const csp = home.headers()['content-security-policy'] ?? '';
-  expect(csp).toContain("script-src 'self'");
   expect(csp).toContain("frame-ancestors 'none'");
+  expect(csp).toContain("object-src 'none'");
+  expect(csp).toContain("base-uri 'self'");
   expect(home.headers()['x-content-type-options']).toBe('nosniff');
-  expect((await request.get('/ads.txt')).status()).toBe(404);
+  const ads = await request.get('/ads.txt');
+  expect(ads.status()).toBe(200);
+  expect(ads.headers()['content-type']).toMatch(/^text\/plain/);
+  expect(await ads.text()).toBe('google.com, pub-8644589635574920, DIRECT, f08c47fec0942fa0\n');
 });
 
-test('no ad code is present when ads are disabled', async ({ page }) => {
+const ADSENSE = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8644589635574920';
+
+test('AdSense script is in <head> exactly once, never re-added on navigation, and no ad units render', async ({ page }) => {
   const w = watch(page);
   await page.goto('/tools/image-resizer');
-  await page.waitForLoadState('networkidle');
+  const count = () => page.evaluate(() => document.querySelectorAll('script[src*="adsbygoogle.js"]').length);
+  expect(await count()).toBe(1);
+  const s = page.locator('head script[src*="adsbygoogle.js"]');
+  await expect(s).toHaveAttribute('src', ADSENSE);
+  await expect(s).toHaveAttribute('crossorigin', 'anonymous');
+  expect(await s.evaluate((e: HTMLScriptElement) => e.async)).toBe(true);
+  await expect(page.locator('head meta[name="google-adsense-account"]')).toHaveAttribute('content', 'ca-pub-8644589635574920');
+  // Client-side navigation through several pages must not inject more copies.
+  for (const label of ['Compress', 'QR Code', 'Captions']) {
+    await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: label, exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    expect(await count()).toBe(1);
+  }
+  await page.goto('/about');
+  expect(await count()).toBe(1);
+  // No ad unit is configured yet, so nothing is placed on the page.
   await expect(page.locator('ins.adsbygoogle')).toHaveCount(0);
-  expect(await page.content()).not.toContain('googlesyndication');
+  await expect(page.getByLabel('Advertisement')).toHaveCount(0);
+  // Only Google's ad hosts were contacted (and those are blocked in tests).
   expect(w.external).toEqual([]);
+  expect(w.ads.length).toBeGreaterThan(0);
+  expect(w.errors).toEqual([]);
+});
+
+test('404 page carries no AdSense code', async ({ page }) => {
+  await page.goto('/missing-page');
+  expect(await page.evaluate(() => document.querySelectorAll('script[src*="adsbygoogle.js"]').length)).toBe(0);
+});
+
+test('tools keep working when the ad script is blocked (ad blocker scenario) @mobile', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/tools/caption-formatter');
+  await page.getByLabel('Your caption or post').fill('Hello world');
+  await expect(page.getByTestId('stat-words')).toHaveText('2');
+  expect(w.errors).toEqual([]);
 });
 
 test('homepage tool search filters and navigation works @mobile', async ({ page }) => {

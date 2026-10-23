@@ -8,8 +8,15 @@ function clean(v: unknown): string {
   return typeof v === 'string' ? v.trim() : '';
 }
 
-const adsenseClientRaw = clean(env.VITE_ADSENSE_CLIENT);
-const adsenseClient = /^ca-pub-\d{10,20}$/.test(adsenseClientRaw) ? adsenseClientRaw : '';
+/**
+ * CreatorKit's AdSense publisher (same account as SmartCalcWorks; matches its
+ * ads.txt). VITE_ADSENSE_CLIENT can override it. Set VITE_ADSENSE_SCRIPT=false
+ * to build without any AdSense code (e.g. for local experiments).
+ */
+export const ADSENSE_CLIENT = 'ca-pub-8644589635574920';
+const adsenseClientRaw = clean(env.VITE_ADSENSE_CLIENT) || ADSENSE_CLIENT;
+const adsenseClient =
+  clean(env.VITE_ADSENSE_SCRIPT) !== 'false' && /^ca-pub-\d{10,20}$/.test(adsenseClientRaw) ? adsenseClientRaw : '';
 const adsenseSlot = /^\d{6,20}$/.test(clean(env.VITE_ADSENSE_SLOT)) ? clean(env.VITE_ADSENSE_SLOT) : '';
 /** Public support address (Cloudflare Email Routing). VITE_CONTACT_EMAIL can override it. */
 export const SUPPORT_EMAIL = 'creatorkit-support@rayore.co.nz';
@@ -34,8 +41,16 @@ export const site = {
 };
 
 /**
- * Ads render only when explicitly switched on AND a valid publisher + slot
- * are configured. Default build: no ad code, no ad network requests.
+ * The AdSense script (adsbygoogle.js) is placed once in every page's <head>
+ * at build time whenever a publisher ID is configured. It is needed for site
+ * verification and review, and loads Google's ad code (which may use cookies),
+ * but on its own places no ad units on the page.
+ */
+export const adsenseScriptEnabled = site.adsenseClient !== '';
+
+/**
+ * Manual ad units render only when explicitly switched on AND a real ad-unit
+ * slot ID from the AdSense dashboard is configured. No slot ID is invented.
  */
 export const adsEnabled =
   clean(env.VITE_ADS_ENABLED) === 'true' && site.adsenseClient !== '' && site.adsenseSlot !== '';

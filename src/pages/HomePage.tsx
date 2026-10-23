@@ -6,6 +6,7 @@ import { Seo } from '../components/Seo';
 import { Faqs } from '../components/ToolPage';
 import { filterTools } from '../data/tools';
 import { websiteSchema } from '../lib/seo';
+import { adsenseScriptEnabled } from '../config/site';
 
 const FRAMES = [
   { r: '1:1', w: 64, h: 64, use: 'Square post' },
@@ -137,8 +138,12 @@ export function HomePage() {
         <h2 id="faq-h" className="mb-5 text-3xl font-bold">Questions</h2>
         <Faqs
           items={[
-            { q: 'Is CreatorKit free?', a: 'Yes. All tools are free to use with no account. CreatorKit may show clearly labelled ads in future to cover running costs; tools will never require clicking an ad.' },
-            { q: 'Are my images uploaded?', a: 'No. Image tools open and process files inside your browser. The only time your browser contacts another website is if you choose to load an image from a URL in the sharing preview tool.' },
+            { q: 'Is CreatorKit free?', a: adsenseScriptEnabled
+                ? 'Yes. All tools are free to use with no account. CreatorKit uses Google AdSense to cover running costs, so you may see clearly labelled ads; no tool ever requires clicking an ad.'
+                : 'Yes. All tools are free to use with no account. CreatorKit may show clearly labelled ads in future to cover running costs; tools will never require clicking an ad.' },
+            { q: 'Are my images uploaded?', a: adsenseScriptEnabled
+                ? 'No. Image tools open and process files inside your browser, and your files are never sent anywhere. Your browser does load Google’s advertising code from Google, and loads an image from another site only if you choose “Show image” in the sharing preview tool.'
+                : 'No. Image tools open and process files inside your browser. The only time your browser contacts another website is if you choose to load an image from a URL in the sharing preview tool.' },
             { q: 'Do I need to install anything?', a: 'No. CreatorKit works in current versions of Chrome, Edge, Safari and Firefox on phones and computers.' },
             { q: 'Is CreatorKit connected to Instagram, Facebook, TikTok or other platforms?', a: 'No. CreatorKit is independent and not affiliated with any platform. Platform names describe which image sizes a preset is meant for.' },
             { q: 'How do I report a problem or suggest a tool?', a: <>See the <Link to="/contact">contact page</Link>.</> },

@@ -40,9 +40,14 @@ export function buildHeadTags(meta: RouteMeta, structuredData: unknown[] = []): 
   if (site.googleSiteVerification && meta.path === '/') {
     tags.push(`<meta name="google-site-verification" content="${esc(site.googleSiteVerification)}" />`);
   }
-  if (site.adsenseClient) {
-    // Lets Google verify site ownership during AdSense review without loading ad code.
+  // Not on noindex pages such as the 404 page: no ad code where there is no content.
+  if (site.adsenseClient && meta.indexable) {
     tags.push(`<meta name="google-adsense-account" content="${esc(site.adsenseClient)}" />`);
+    // Written once into the static HTML of each page. Client-side navigation
+    // never re-adds it (Seo only syncs title/meta/JSON-LD).
+    tags.push(
+      `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(site.adsenseClient)}" crossorigin="anonymous"></script>`,
+    );
   }
   for (const data of structuredData) {
     tags.push(`<script type="application/ld+json">${jsonLd(data)}</script>`);

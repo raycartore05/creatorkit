@@ -7,8 +7,9 @@ declare global {
   }
 }
 
+/** The prerendered <head> already includes adsbygoogle.js; only add it if missing (e.g. dev server). */
 function ensureScript() {
-  if (document.querySelector('script[data-ck-adsense]')) return;
+  if (document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')) return;
   const s = document.createElement('script');
   s.async = true;
   s.crossOrigin = 'anonymous';

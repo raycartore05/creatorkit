@@ -4,7 +4,9 @@ import { existsSync } from 'node:fs';
 // Use the system Chrome if present (CI images often ship one); otherwise
 // fall back to Playwright's own Chromium (`npx playwright install chromium`).
 const systemChrome = ['/opt/google/chrome/chrome', '/usr/bin/google-chrome'].find((p) => existsSync(p));
-const launchOptions = systemChrome ? { executablePath: systemChrome } : {};
+// Ad hosts resolve nowhere during tests: no real ad requests, impressions or clicks.
+const BLOCK_ADS = '--host-resolver-rules=MAP *.googlesyndication.com ~NOTFOUND, MAP *.doubleclick.net ~NOTFOUND, MAP *.googleadservices.com ~NOTFOUND, MAP *.adtrafficquality.google ~NOTFOUND, MAP fundingchoicesmessages.google.com ~NOTFOUND';
+const launchOptions = { args: [BLOCK_ADS], ...(systemChrome ? { executablePath: systemChrome } : {}) };
 
 export default defineConfig({
   testDir: './e2e',

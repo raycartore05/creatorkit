@@ -51,12 +51,17 @@ public: never put secrets in them.
 |---|---|
 | `VITE_CONTACT_EMAIL` | Optional override for the support address (default `creatorkit-support@rayore.co.nz`, set in `src/config/site.ts`). |
 | `VITE_GOOGLE_SITE_VERIFICATION` | Search Console HTML-tag token (homepage only). |
-| `VITE_ADSENSE_CLIENT` | `ca-pub-…` for CreatorKit's own AdSense site entry. Adds the `google-adsense-account` meta tag and `ads.txt`. Does **not** load ads. |
-| `VITE_ADS_ENABLED` | `true` loads ad code. Only after approval and a consent message for EEA/UK/CH. |
-| `VITE_ADSENSE_SLOT` | Display ad unit ID. |
+| `VITE_ADSENSE_CLIENT` | Optional override of the publisher ID (default `ca-pub-8644589635574920`, in `src/config/site.ts`). |
+| `VITE_ADSENSE_SCRIPT` | Set to `false` to build with no AdSense code at all. |
+| `VITE_ADS_ENABLED` | `true` renders manual ad units. Needs `VITE_ADSENSE_SLOT`. |
+| `VITE_ADSENSE_SLOT` | Display ad unit ID created in AdSense (Ads › By ad unit). |
 
-Turning ads on also switches the generated CSP and privacy policy text to
-the advertising versions automatically.
+By default every content page gets the AdSense script once in `<head>`, plus
+the `google-adsense-account` meta tag, and the build writes `ads.txt`. No ad
+units are placed until a real slot ID is configured. The 404 page has no ad
+code. The CSP and privacy policy switch to their advertising versions
+automatically. E2E tests block Google ad hosts in Chrome, so test runs never
+contact ad servers.
 
 ## Cloudflare Pages settings
 

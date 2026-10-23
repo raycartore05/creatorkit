@@ -129,9 +129,14 @@ describe('routing and pages', () => {
     at('/does-not-exist');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('off the canvas');
   });
-  it('privacy policy states no ads when ads are disabled', () => {
+  it('privacy policy discloses Google advertising and cookies', () => {
     at('/privacy');
-    expect(screen.getByText(/currently shows no advertising/)).toBeInTheDocument();
+    // Default build includes the AdSense script, so the policy must disclose Google advertising.
+    expect(screen.getByRole('heading', { name: 'Advertising' })).toBeInTheDocument();
+    expect(screen.getByText(/CreatorKit uses Google AdSense to show advertising/)).toBeInTheDocument();
+    expect(screen.getByText(/Google and other third-party vendors use cookies/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Google Ads Settings' })).toHaveAttribute('href', 'https://adssettings.google.com/');
+    expect(screen.queryByText(/does not set cookies and does not use/)).toBeNull();
   });
   it('contact page shows the support email as a mailto link', () => {
     at('/contact');
@@ -276,5 +281,21 @@ describe('support email unchanged', () => {
     at('/contact');
     expect(screen.getByTestId('support-email')).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
     expect(screen.getByTestId('footer-email')).toHaveAttribute('href', 'mailto:creatorkit-support@rayore.co.nz');
+  });
+});
+
+describe('AdSense head tags', () => {
+  it('adds the exact AdSense snippet and account meta to content pages only', async () => {
+    const { buildHeadTags } = await import('../src/lib/seo');
+    const { metaForPath, NOT_FOUND_META } = await import('../src/data/routes');
+    const snippet = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8644589635574920" crossorigin="anonymous"></script>';
+    const home = buildHeadTags(metaForPath('/'));
+    expect(home.split(snippet)).toHaveLength(2);
+    expect(home).toContain('<meta name="google-adsense-account" content="ca-pub-8644589635574920" />');
+    expect(buildHeadTags(NOT_FOUND_META)).not.toContain('adsbygoogle');
+  });
+  it('does not render ad units without a configured slot ID', () => {
+    at('/tools/image-resizer');
+    expect(document.querySelector('ins.adsbygoogle')).toBeNull();
   });
 });
