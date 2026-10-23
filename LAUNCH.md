@@ -64,9 +64,9 @@ been copied here.
 
 1. Wait until the site is live with a working contact email and has been
    indexed for a few weeks.
-2. AdSense › Sites › Add site › `rayore.co.nz` (AdSense manages subdomains
-   under their parent domain; if it asks for the exact URL, use
-   `creator.rayore.co.nz`). Each new site goes through its own review.
+2. AdSense › Sites › Add site. I could not confirm from Google's help pages
+   whether a subdomain is added on its own or under `rayore.co.nz`; follow
+   what the Add site form accepts. Each new site goes through its own review.
 3. Set `VITE_ADSENSE_CLIENT=ca-pub-…` (your ID) in Cloudflare and redeploy.
    This adds the `google-adsense-account` meta tag and `ads.txt` but loads no ads.
 4. Request review. Do not ask anyone to click ads or send artificial traffic.
