@@ -7,6 +7,7 @@ import { canEncodeWebp, canvasToBlob, createCanvas, downloadBlob, FORMAT_EXT, ty
 import { Icon } from '../components/Icon';
 import { useImageFile } from '../components/useImageFile';
 import { Alert, ColorField, Dropzone, NumberField, Segmented, Select, Slider } from '../components/ui';
+import { trackToolUse } from '../lib/analytics';
 
 interface Result {
   blob: Blob;
@@ -81,6 +82,7 @@ export function ImageCompressor() {
         blob = await canvasToBlob(canvas, format, quality);
       }
       setResult({ blob, url: URL.createObjectURL(blob), width: dims.width, height: dims.height, format, quality: q, fits });
+      trackToolUse('image-compressor', 'compress', FORMAT_EXT[format]);
     } catch (e) {
       setProblem(e instanceof Error ? e.message : 'Compression failed.');
     } finally {
@@ -185,7 +187,11 @@ export function ImageCompressor() {
             type="button"
             className="btn-secondary"
             disabled={!result}
-            onClick={() => result && downloadBlob(result.blob, outputFileName(image.name, 'compressed', FORMAT_EXT[result.format]))}
+            onClick={() => {
+              if (!result) return;
+              downloadBlob(result.blob, outputFileName(image.name, 'compressed', FORMAT_EXT[result.format]));
+              trackToolUse('image-compressor', 'download', FORMAT_EXT[result.format]);
+            }}
           >
             <Icon name="download" className="h-4 w-4" /> Download
           </button>

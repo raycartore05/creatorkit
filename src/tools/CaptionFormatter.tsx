@@ -3,6 +3,7 @@ import { formatNumber } from '../lib/format';
 import { cleanWhitespace, formatHashtags, moveHashtagsToEnd, textStats, type HashtagOptions } from '../lib/text';
 import { Icon } from '../components/Icon';
 import { Alert, CopyButton, NumberField, Toggle } from '../components/ui';
+import { trackToolUse } from '../lib/analytics';
 
 /**
  * Commonly cited caption/post limits. These are NOT verified against
@@ -36,12 +37,13 @@ export function CaptionFormatter() {
   const tags = formatHashtags(tagInput, tagOpts);
   const tagString = tags.join(tagOpts.separator === 'newline' ? '\n' : ' ');
 
-  function apply(next: string, msg: string) {
+  function apply(next: string, msg: string, action: 'clean_whitespace' | 'move_hashtags') {
     if (next === text) {
       setNotice('Nothing to change.');
     } else {
       setText(next);
       setNotice(msg);
+      trackToolUse('caption-formatter', action);
     }
     setTimeout(() => setNotice(null), 2500);
   }
@@ -74,13 +76,13 @@ export function CaptionFormatter() {
             {remaining !== null && (over ? ` — ${formatNumber(-remaining)} over your ${formatNumber(lim)} limit` : ` — ${formatNumber(remaining)} left of ${formatNumber(lim)}`)}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button type="button" className="btn-secondary" disabled={!text} onClick={() => apply(cleanWhitespace(text, { trimLines, collapseSpaces, limitBlankLines: limitBlank }), 'Whitespace cleaned up.')}>
+            <button type="button" className="btn-secondary" disabled={!text} onClick={() => apply(cleanWhitespace(text, { trimLines, collapseSpaces, limitBlankLines: limitBlank }), 'Whitespace cleaned up.', 'clean_whitespace')}>
               Clean up spacing
             </button>
-            <button type="button" className="btn-secondary" disabled={stats.hashtags === 0} onClick={() => apply(moveHashtagsToEnd(text, tagOpts), 'Hashtags moved to the end.')}>
+            <button type="button" className="btn-secondary" disabled={stats.hashtags === 0} onClick={() => apply(moveHashtagsToEnd(text, tagOpts), 'Hashtags moved to the end.', 'move_hashtags')}>
               Move hashtags to end
             </button>
-            <CopyButton text={text} label="Copy caption" className="btn-primary" />
+            <CopyButton text={text} label="Copy caption" className="btn-primary" onCopied={() => trackToolUse('caption-formatter', 'copy_caption')} />
             <button type="button" className="btn-quiet" disabled={!text} onClick={() => { setText(''); setNotice(null); }}>
               <Icon name="reset" className="h-4 w-4" /> Clear
             </button>
@@ -110,7 +112,7 @@ export function CaptionFormatter() {
             <pre className="min-h-12 whitespace-pre-wrap break-words rounded-lg border border-line bg-paper p-3 font-sans text-sm" data-testid="hashtag-output">{tagString || '—'}</pre>
           </div>
           <div className="flex flex-wrap gap-2">
-            <CopyButton text={tagString} label="Copy hashtags" />
+            <CopyButton text={tagString} label="Copy hashtags" onCopied={() => trackToolUse('caption-formatter', 'copy_hashtags')} />
             <button type="button" className="btn-secondary" disabled={!tagString} onClick={() => setText((t) => (t.trim() ? `${t.trimEnd()}\n\n${tagString}` : tagString))}>
               Add to caption
             </button>

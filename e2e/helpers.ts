@@ -4,8 +4,12 @@ import { join } from 'node:path';
 
 export const fixture = (name: string) => join(import.meta.dirname, 'fixtures', name);
 
-/** Google ad hosts. Chrome is launched with these resolving nowhere (see playwright.config.ts), so tests never reach real ad servers or create impressions. */
-export const AD_HOST = /(^|\.)(googlesyndication\.com|doubleclick\.net|googleadservices\.com|adtrafficquality\.google|fundingchoicesmessages\.google\.com)$/;
+/**
+ * Google ad and analytics hosts. Chrome is launched with these resolving
+ * nowhere (see playwright.config.ts), so tests never reach real ad servers,
+ * create impressions, or send visits to Google Analytics.
+ */
+export const AD_HOST = /(^|\.)(googlesyndication\.com|doubleclick\.net|googleadservices\.com|adtrafficquality\.google|fundingchoicesmessages\.google\.com|googletagmanager\.com|google-analytics\.com|analytics\.google\.com)$/;
 
 /** Records every request that leaves localhost (ad requests kept separately), and every console error. */
 export function watch(page: Page) {
@@ -19,7 +23,7 @@ export function watch(page: Page) {
   });
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
-    // The blocked AdSense script reports a load failure; that is expected in tests.
+    // The blocked AdSense/gtag scripts report a load failure; that is expected in tests.
     const src = m.location().url;
     if (src && AD_HOST.test(new URL(src).hostname)) return;
     errors.push(m.text());

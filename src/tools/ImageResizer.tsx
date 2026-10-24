@@ -11,6 +11,7 @@ import { OutputControls } from '../components/OutputControls';
 import { PlacementEditor } from '../components/PlacementEditor';
 import { useImageFile } from '../components/useImageFile';
 import { Alert, ColorField, Dropzone, NumberField, Segmented, Select, Slider } from '../components/ui';
+import { trackToolUse } from '../lib/analytics';
 
 export function ImageResizer() {
   const { image, error, busy, load, reset } = useImageFile();
@@ -72,6 +73,7 @@ export function ImageResizer() {
         jpegBackground: bgColor,
       });
       downloadBlob(blob, outputFileName(image.name, `${outW}x${outH}`, FORMAT_EXT[format]));
+      trackToolUse('image-resizer', 'download', FORMAT_EXT[format]);
       setStatus({ tone: 'ok', text: `Downloaded a ${outW} × ${outH} ${FORMAT_EXT[format].toUpperCase()} (${formatBytes(blob.size)}).` });
     } catch (e) {
       setStatus({ tone: 'bad', text: e instanceof Error ? e.message : 'Export failed.' });

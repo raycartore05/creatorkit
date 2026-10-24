@@ -17,7 +17,15 @@ export const ADSENSE_CLIENT = 'ca-pub-8644589635574920';
 const adsenseClientRaw = clean(env.VITE_ADSENSE_CLIENT) || ADSENSE_CLIENT;
 const adsenseClient =
   clean(env.VITE_ADSENSE_SCRIPT) !== 'false' && /^ca-pub-\d{10,20}$/.test(adsenseClientRaw) ? adsenseClientRaw : '';
-const adsenseSlot = /^\d{6,20}$/.test(clean(env.VITE_ADSENSE_SLOT)) ? clean(env.VITE_ADSENSE_SLOT) : '';
+/**
+ * CreatorKit's own GA4 web stream ("CreatorKit web", property "CreatorKit").
+ * VITE_GA_MEASUREMENT_ID can override it; VITE_GA=false builds without
+ * Google Analytics. Measurement IDs are public identifiers, not secrets.
+ */
+export const GA_MEASUREMENT_ID = 'G-WPEHRBK1Q4';
+const gaIdRaw = clean(env.VITE_GA_MEASUREMENT_ID) || GA_MEASUREMENT_ID;
+const gaMeasurementId = clean(env.VITE_GA) !== 'false' && /^G-[A-Z0-9]{6,12}$/.test(gaIdRaw) ? gaIdRaw : '';
+const adsenseSlot =/^\d{6,20}$/.test(clean(env.VITE_ADSENSE_SLOT)) ? clean(env.VITE_ADSENSE_SLOT) : '';
 /** Public support address (Cloudflare Email Routing). VITE_CONTACT_EMAIL can override it. */
 export const SUPPORT_EMAIL = 'creatorkit-support@rayore.co.nz';
 const contactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean(env.VITE_CONTACT_EMAIL))
@@ -37,6 +45,7 @@ export const site = {
   googleSiteVerification: clean(env.VITE_GOOGLE_SITE_VERIFICATION),
   adsenseClient,
   adsenseSlot,
+  gaMeasurementId,
   buildDate: typeof __BUILD_DATE__ === 'string' ? __BUILD_DATE__ : '',
 };
 
@@ -47,6 +56,12 @@ export const site = {
  * but on its own places no ad units on the page.
  */
 export const adsenseScriptEnabled = site.adsenseClient !== '';
+
+/**
+ * Google Analytics 4: /ga-init.js (consent defaults + config) and gtag.js are
+ * written once into the <head> of every indexable page at build time.
+ */
+export const analyticsEnabled = site.gaMeasurementId !== '';
 
 /**
  * Manual ad units render only when explicitly switched on AND a real ad-unit

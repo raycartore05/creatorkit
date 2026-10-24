@@ -4,6 +4,7 @@ import { buildOgTags, checkHttpUrl, descriptionAdvice, displayDomain, imageRatio
 import { countGraphemes } from '../lib/text';
 import { Icon } from '../components/Icon';
 import { Alert, CopyButton } from '../components/ui';
+import { trackToolUse } from '../lib/analytics';
 
 const ADVICE_TONE: Record<LengthAdvice['level'], string> = {
   empty: 'text-muted',
@@ -165,7 +166,7 @@ export function OgPreview() {
         <div>
           <div className="mb-2 flex items-center justify-between gap-2">
             <h2 className="font-sans text-sm font-semibold">Meta tags for your page’s &lt;head&gt;</h2>
-            <CopyButton text={tags} label="Copy tags" />
+            <CopyButton text={tags} label="Copy tags" onCopied={() => trackToolUse('og-preview', 'copy_tags')} />
           </div>
           <pre className="max-h-80 overflow-auto rounded-xl border border-line bg-ink p-4 text-xs leading-relaxed text-white" data-testid="og-tags"><code>{tags || '<!-- Fill in the form to generate tags -->'}</code></pre>
         </div>

@@ -299,3 +299,93 @@ describe('AdSense head tags', () => {
     expect(document.querySelector('ins.adsbygoogle')).toBeNull();
   });
 });
+
+describe('Google Analytics', () => {
+  const GA = 'G-WPEHRBK1Q4';
+  const GTAG = `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>`;
+  const INIT = '<script src="/ga-init.js"></script>';
+
+  it('head tags: ga-init.js, then gtag.js, then AdSense, once each, content pages only', async () => {
+    const { buildHeadTags } = await import('../src/lib/seo');
+    const { metaForPath, NOT_FOUND_META } = await import('../src/data/routes');
+    for (const path of ['/', '/tools/image-resizer', '/privacy']) {
+      const head = buildHeadTags(metaForPath(path));
+      expect(head.split(GTAG)).toHaveLength(2);
+      expect(head.split(INIT)).toHaveLength(2);
+      expect(head.indexOf(INIT)).toBeLessThan(head.indexOf(GTAG));
+      expect(head.indexOf(GTAG)).toBeLessThan(head.indexOf('adsbygoogle.js'));
+    }
+    const nf = buildHeadTags(NOT_FOUND_META);
+    expect(nf).not.toContain('googletagmanager');
+    expect(nf).not.toContain('ga-init');
+  });
+
+  it('ga-init.js sets EEA/UK/CH consent defaults before config and never sends page_view itself', async () => {
+    const { gaInitScript } = await import('../src/lib/analytics');
+    const js = gaInitScript(GA);
+    expect(js.indexOf("gtag('consent', 'default'")).toBeGreaterThan(-1);
+    expect(js.indexOf("gtag('consent', 'default'")).toBeLessThan(js.indexOf(`gtag('config', '${GA}')`));
+    expect(js).toContain('"analytics_storage":"denied"');
+    expect(js).toContain('"ad_user_data":"denied"');
+    expect(js).not.toMatch(/page_view|send_page_view/);
+    // Only Google's consent message may record a visitor's choice.
+    expect(js).not.toMatch(/['"]update['"]/);
+    // Runs as-is and records commands in order.
+    const w: { dataLayer?: unknown[]; gtag?: unknown } = {};
+    new Function('window', 'dataLayer', `${js.replace('window.dataLayer = window.dataLayer || [];', '')}`)(w, (w.dataLayer = []));
+    const calls = (w.dataLayer as ArrayLike<unknown>[]).map((a) => Array.from(a));
+    expect(calls.map((c) => c[0])).toEqual(['consent', 'js', 'config']);
+    expect(calls[2]).toEqual(['config', GA]);
+    expect(() => gaInitScript('UA-1234-1')).toThrow();
+  });
+
+  it('trackToolUse sends only fixed parameters and is a no-op without gtag', async () => {
+    const { trackToolUse } = await import('../src/lib/analytics');
+    delete window.gtag;
+    expect(() => trackToolUse('image-resizer', 'download', 'png')).not.toThrow();
+    const calls: unknown[][] = [];
+    window.gtag = (...args: unknown[]) => calls.push(args);
+    trackToolUse('image-resizer', 'download', 'png');
+    trackToolUse('watermark', 'download', 'my-photo.png');
+    trackToolUse('caption-formatter', 'copy_caption');
+    expect(calls).toEqual([
+      ['event', 'image_resizer_used', { tool_name: 'image_resizer', action_type: 'download', output_format: 'png' }],
+      ['event', 'watermark_tool_used', { tool_name: 'watermark', action_type: 'download' }],
+      ['event', 'caption_formatter_used', { tool_name: 'caption_formatter', action_type: 'copy_caption' }],
+    ]);
+    window.gtag = () => {
+      throw new Error('blocked');
+    };
+    expect(() => trackToolUse('og-preview', 'copy_tags')).not.toThrow();
+    delete window.gtag;
+  });
+
+  it('a failed copy does not count as tool usage', async () => {
+    const { CopyButton } = await import('../src/components/ui');
+    const user = userEvent.setup();
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => Promise.reject(new Error('denied')) }, configurable: true });
+    const prevExec = document.execCommand;
+    document.execCommand = () => false;
+    let copied = 0;
+    render(<CopyButton text="hello" onCopied={() => (copied += 1)} />);
+    await user.click(screen.getByRole('button'));
+    await screen.findByText(/Copy failed/);
+    expect(copied).toBe(0);
+    document.execCommand = prevExec;
+  });
+
+  it('privacy policy discloses Google Analytics, Cloudflare Web Analytics, consent and what tools send', () => {
+    at('/privacy');
+    expect(screen.getByRole('heading', { name: 'Analytics' })).toBeInTheDocument();
+    expect(screen.getByText(/CreatorKit uses Google Analytics to understand/)).toBeInTheDocument();
+    expect(screen.getByText(/It never sends your images, file names, or the text/)).toBeInTheDocument();
+    expect(screen.getByText(/does not set or read cookies unless you agree in Google’s consent message/)).toBeInTheDocument();
+    expect(screen.getByText(/Cloudflare Web Analytics to count page views/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Google Analytics opt-out browser add-on' })).toHaveAttribute('href', 'https://tools.google.com/dlpage/gaoptout');
+    expect(screen.queryByText(/does not use analytics scripts/)).toBeNull();
+    expect(screen.queryByText(/does not track whether you follow the link/)).toBeNull();
+    // The advertising paragraph appears once (it used to be duplicated).
+    const main = screen.getByRole('main').textContent ?? '';
+    expect(main.split('Google and other third-party vendors use cookies to serve ads').length).toBe(2);
+  });
+});

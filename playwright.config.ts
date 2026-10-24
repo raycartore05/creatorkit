@@ -4,8 +4,9 @@ import { existsSync } from 'node:fs';
 // Use the system Chrome if present (CI images often ship one); otherwise
 // fall back to Playwright's own Chromium (`npx playwright install chromium`).
 const systemChrome = ['/opt/google/chrome/chrome', '/usr/bin/google-chrome'].find((p) => existsSync(p));
-// Ad hosts resolve nowhere during tests: no real ad requests, impressions or clicks.
-const BLOCK_ADS = '--host-resolver-rules=MAP *.googlesyndication.com ~NOTFOUND, MAP *.doubleclick.net ~NOTFOUND, MAP *.googleadservices.com ~NOTFOUND, MAP *.adtrafficquality.google ~NOTFOUND, MAP fundingchoicesmessages.google.com ~NOTFOUND';
+// Ad and analytics hosts resolve nowhere during tests: no real ad requests,
+// impressions or clicks, and no test visits in Google Analytics.
+const BLOCK_ADS = '--host-resolver-rules=MAP *.googlesyndication.com ~NOTFOUND, MAP *.doubleclick.net ~NOTFOUND, MAP *.googleadservices.com ~NOTFOUND, MAP *.adtrafficquality.google ~NOTFOUND, MAP fundingchoicesmessages.google.com ~NOTFOUND, MAP *.googletagmanager.com ~NOTFOUND, MAP googletagmanager.com ~NOTFOUND, MAP *.google-analytics.com ~NOTFOUND, MAP google-analytics.com ~NOTFOUND, MAP *.analytics.google.com ~NOTFOUND, MAP analytics.google.com ~NOTFOUND';
 const launchOptions = { args: [BLOCK_ADS], ...(systemChrome ? { executablePath: systemChrome } : {}) };
 
 export default defineConfig({

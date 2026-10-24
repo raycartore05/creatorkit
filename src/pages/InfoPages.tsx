@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { adsenseScriptEnabled, site } from '../config/site';
+import { adsenseScriptEnabled, analyticsEnabled, site } from '../config/site';
 import { groupByPlatform, PRESETS_CHECKED_ON, PROFILE_PRESETS, SOCIAL_PRESETS } from '../data/presets';
 import { Icon } from '../components/Icon';
 import { Seo } from '../components/Seo';
@@ -176,6 +176,18 @@ export function ContactPage() {
   );
 }
 
+function googleCookiesNote(): string {
+  if (analyticsEnabled && adsenseScriptEnabled) return ' Google Analytics and Google’s advertising code, described below, can set and read cookies.';
+  if (analyticsEnabled) return ' Google Analytics, described below, can set and read cookies.';
+  if (adsenseScriptEnabled) return ' Google’s advertising code, described below, can set and read cookies.';
+  return '';
+}
+
+function thirdPartyScriptsNote(): string {
+  const scripts = ['Cloudflare Web Analytics', analyticsEnabled && 'Google Analytics', adsenseScriptEnabled && 'Google AdSense'].filter(Boolean);
+  return ` The third-party scripts are ${scripts.length > 1 ? `${scripts.slice(0, -1).join(', ')} and ${scripts.at(-1)}` : scripts[0]}. No third-party font services are used.`;
+}
+
 export function PrivacyPage() {
   return (
     <Page path="/privacy" title="Privacy policy" updated={site.buildDate}>
@@ -193,18 +205,34 @@ export function PrivacyPage() {
       <p>
         CreatorKit is hosted on Cloudflare Pages. Like any web host, Cloudflare processes technical information needed to deliver and protect the site, such as your IP address, browser type, the page requested and the time. This is handled by Cloudflare under its own <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">privacy policy</a>. CreatorKit does not use this information to identify you.
       </p>
+      <p>
+        CreatorKit also uses Cloudflare Web Analytics to count page views. It does not use cookies or browser storage and does not identify individual visitors.
+      </p>
       <ul>
-        <li>CreatorKit does not use analytics scripts.</li>
         <li>
           CreatorKit’s own code does not set cookies or use browser storage (such as localStorage) for tracking.
-          {adsenseScriptEnabled && ' Google’s advertising code, described below, can set and read cookies.'}
+          {googleCookiesNote()}
         </li>
         <li>
           Fonts and CreatorKit’s own code are served from CreatorKit itself.
-          {adsenseScriptEnabled ? ' The one third-party script is Google AdSense.' : ' No third-party font or script services are used.'}
+          {thirdPartyScriptsNote()}
         </li>
         <li>There are no accounts, sign-up forms or newsletters.</li>
       </ul>
+      {analyticsEnabled && (
+        <>
+          <h2>Analytics</h2>
+          <p>
+            CreatorKit uses Google Analytics to understand how many people visit, which pages and tools they use, and how they found the site (for example a search engine, a social media post or a campaign link). Google Analytics loads from Google’s servers and uses cookies to tell visits apart. It records the pages you view, your device and browser type, your approximate location (worked out from your IP address) and the website or link that referred you. Google Analytics does not log or store your IP address.
+          </p>
+          <p>
+            When you complete an action in a tool, such as downloading a resized image or copying a caption, CreatorKit sends Google Analytics only the tool name, the type of action and, for downloads, the file format (for example PNG). It never sends your images, file names, or the text, links and settings you enter.
+          </p>
+          <p>
+            For visitors in the European Economic Area, the United Kingdom and Switzerland, Google Analytics does not set or read cookies unless you agree in Google’s consent message. If you don’t agree, Google may still receive basic information that a page was viewed, without cookies or an identifier that links your visits. Anyone can block Google Analytics with the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics opt-out browser add-on</a>, a content blocker or browser privacy settings. The tools keep working either way.
+          </p>
+        </>
+      )}
       <h2>Advertising</h2>
       {adsenseScriptEnabled ? (
         <>
@@ -212,7 +240,7 @@ export function PrivacyPage() {
             CreatorKit uses Google AdSense to show advertising. Every page includes Google’s AdSense code, which loads from Google’s servers, so Google receives your IP address and browser information when you visit. Ads, when shown, are labelled “Advertisement”. The image and text tools still work entirely in your browser, and CreatorKit never sends your files or the text you enter to Google or anyone else.
           </p>
           <p>
-            Google and other third-party vendors use cookies to serve ads based on your previous visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads based on your visits to this site and/or other sites on the internet. Google and other third-party vendors use cookies to serve ads based on your previous visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads based on your visits to this site and/or other sites on the internet.
+            Google and other third-party vendors use cookies to serve ads based on your previous visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads based on your visits to this site and/or other sites on the internet.
           </p>
           <p>
             You can opt out of personalised advertising by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>, or opt out of some third-party vendors’ use of cookies at <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer">aboutads.info</a>. For visitors in the European Economic Area, the United Kingdom and Switzerland, CreatorKit uses Google’s consent message so you can choose whether personalised ads are shown. See also <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">how Google uses information from sites that use its services</a>.
@@ -225,7 +253,7 @@ export function PrivacyPage() {
       )}
       <h2>Optional support through PayPal</h2>
       <p>
-        The “Support CreatorKit” links take you to PayPal’s own website. CreatorKit does not process payments, does not receive your card or bank details, and does not track whether you follow the link. Anything you enter on PayPal is handled by PayPal under its own privacy statement. Contributing is optional and has no effect on what you can use on CreatorKit.
+        The “Support CreatorKit” links take you to PayPal’s own website. CreatorKit does not process payments and does not receive your card or bank details.{analyticsEnabled ? ' Google Analytics records that the link was clicked, as it does for any link to another website, but not anything you do on PayPal.' : ' CreatorKit does not track whether you follow the link.'} Anything you enter on PayPal is handled by PayPal under its own privacy statement. Contributing is optional and has no effect on what you can use on CreatorKit.
       </p>
       <h2>If you contact us</h2>
       <p>

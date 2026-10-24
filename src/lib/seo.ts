@@ -40,6 +40,14 @@ export function buildHeadTags(meta: RouteMeta, structuredData: unknown[] = []): 
   if (site.googleSiteVerification && meta.path === '/') {
     tags.push(`<meta name="google-site-verification" content="${esc(site.googleSiteVerification)}" />`);
   }
+  // Google Analytics 4: consent defaults and config first (/ga-init.js, a tiny
+  // same-origin file, because the CSP blocks inline scripts), then gtag.js.
+  // Both come before AdSense so the consent defaults exist before Google's
+  // consent message can update them. Not on the 404 page, like AdSense.
+  if (site.gaMeasurementId && meta.indexable) {
+    tags.push(`<script src="/ga-init.js"></script>`);
+    tags.push(`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(site.gaMeasurementId)}"></script>`);
+  }
   // Not on noindex pages such as the 404 page: no ad code where there is no content.
   if (site.adsenseClient && meta.indexable) {
     tags.push(`<meta name="google-adsense-account" content="${esc(site.adsenseClient)}" />`);

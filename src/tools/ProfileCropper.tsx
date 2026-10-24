@@ -11,6 +11,7 @@ import { OutputControls } from '../components/OutputControls';
 import { PlacementEditor } from '../components/PlacementEditor';
 import { useImageFile } from '../components/useImageFile';
 import { Alert, Dropzone, Select, Slider, Toggle } from '../components/ui';
+import { trackToolUse } from '../lib/analytics';
 
 function MiniPreview({ image, rect, out, size, circle }: { image: LoadedImage; rect: DrawRect; out: number; size: number; circle: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -67,6 +68,7 @@ export function ProfileCropper() {
         circle: circleOut,
       });
       downloadBlob(blob, outputFileName(image.name, circleOut ? `circle-${outW}` : `${outW}x${outH}`, FORMAT_EXT[effFormat]));
+      trackToolUse('profile-cropper', 'download', FORMAT_EXT[effFormat]);
       setStatus({ tone: 'ok', text: `Downloaded ${outW} × ${outH} ${FORMAT_EXT[effFormat].toUpperCase()} (${formatBytes(blob.size)}).` });
     } catch (e) {
       setStatus({ tone: 'bad', text: e instanceof Error ? e.message : 'Export failed.' });

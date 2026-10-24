@@ -12,6 +12,7 @@ import { OutputControls } from '../components/OutputControls';
 import { PlacementEditor } from '../components/PlacementEditor';
 import { useImageFile } from '../components/useImageFile';
 import { Alert, ColorField, Dropzone, Slider, Toggle } from '../components/ui';
+import { trackToolUse } from '../lib/analytics';
 
 const GRID: { v: WmPosition; label: string }[] = [
   { v: 'tl', label: 'Top left' },
@@ -64,6 +65,7 @@ export function Watermark() {
         draw,
       });
       downloadBlob(blob, outputFileName(image.name, 'watermarked', FORMAT_EXT[format]));
+      trackToolUse('watermark', 'download', FORMAT_EXT[format]);
       setStatus({ tone: 'ok', text: `Downloaded ${out.width} × ${out.height} ${FORMAT_EXT[format].toUpperCase()} (${formatBytes(blob.size)}).` });
     } catch (e) {
       setStatus({ tone: 'bad', text: e instanceof Error ? e.message : 'Export failed.' });

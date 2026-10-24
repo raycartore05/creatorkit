@@ -20,7 +20,7 @@ independently verified · 👤 requires Ray's action · ⛔ blocked · ⬜ not i
 | Domain and HTTPS | ⛔ | Depends on the Pages project |
 | Production deployment + live verification | ⛔ | Depends on the above |
 | Search Console verification | 👤 | After deploy (steps below) |
-| Analytics | ⬜ | Deliberately none. Optional: Cloudflare Web Analytics (cookieless) — update privacy policy first |
+| Analytics | ☑️ | GA4 property "CreatorKit", stream "CreatorKit web", `G-WPEHRBK1Q4`, plus Cloudflare Web Analytics as a baseline. Code tested locally with a gtag stub; live Realtime check pending deploy. Enable "consent mode for analytics" in AdSense Privacy & messaging |
 | AdSense submission readiness | 👤 | Site content is ready; needs contact email, live site, and your AdSense steps below |
 | Consent (EEA/UK/CH) | 👤 | Required before ads go live: publish Google's CMP message in AdSense |
 | Backup & recovery | ✅ | Git is the source of truth; see README |

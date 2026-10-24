@@ -79,7 +79,18 @@ export function Dropzone({
   );
 }
 
-export function CopyButton({ text, label = 'Copy', className = 'btn-secondary' }: { text: string; label?: string; className?: string }) {
+export function CopyButton({
+  text,
+  label = 'Copy',
+  className = 'btn-secondary',
+  onCopied,
+}: {
+  text: string;
+  label?: string;
+  className?: string;
+  /** Called only after the text really reached the clipboard. */
+  onCopied?: () => void;
+}) {
   const [state, setState] = useState<'idle' | 'ok' | 'fail'>('idle');
   return (
     <button
@@ -89,6 +100,7 @@ export function CopyButton({ text, label = 'Copy', className = 'btn-secondary' }
       onClick={async () => {
         const ok = await copyText(text);
         setState(ok ? 'ok' : 'fail');
+        if (ok) onCopied?.();
         setTimeout(() => setState('idle'), 2000);
       }}
     >

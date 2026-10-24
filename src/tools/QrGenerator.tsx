@@ -3,6 +3,7 @@ import { dataUrlToBlob, downloadBlob } from '../lib/image';
 import { QR_MAX_SIZE, QR_MIN_SIZE, qrErrorMessage, qrToDataUrl, qrToSvg, validateQr, type Ecc, type QrSettings } from '../lib/qr';
 import { Icon } from '../components/Icon';
 import { Alert, ColorField, Segmented, Select, Slider } from '../components/ui';
+import { trackToolUse } from '../lib/analytics';
 
 const DEFAULTS: QrSettings = {
   mode: 'url',
@@ -51,11 +52,13 @@ export function QrGenerator() {
   async function downloadPng() {
     if (!dataUrl) return;
     downloadBlob(dataUrlToBlob(dataUrl), `qr-code-${s.size}px.png`);
+    trackToolUse('qr-code-generator', 'download', 'png');
   }
   async function downloadSvg() {
     try {
       const svg = await qrToSvg(s);
       downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), 'qr-code.svg');
+      trackToolUse('qr-code-generator', 'download', 'svg');
     } catch (e) {
       setGenError(qrErrorMessage(e));
     }

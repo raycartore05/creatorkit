@@ -1,7 +1,8 @@
 /**
  * After `vite build`, render every route to static HTML and write
  * sitemap.xml, robots.txt, _headers (Cloudflare Pages) and, only when an
- * AdSense publisher ID is configured, ads.txt.
+ * AdSense publisher ID is configured, ads.txt; when a GA4 measurement ID is
+ * configured, ga-init.js.
  *
  *   dist/index.html                     → /
  *   dist/tools/image-resizer.html       → /tools/image-resizer
@@ -19,7 +20,7 @@ const template = await readFile(join(dist, 'index.html'), 'utf8');
 if (!template.includes('<!--app-html-->') || !template.includes('<!--app-head-->')) {
   throw new Error('dist/index.html is missing the <!--app-head--> or <!--app-html--> placeholders.');
 }
-const { render, routes, canonicalUrl, site, adsEnabled, adsenseScriptEnabled } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
+const { render, routes, canonicalUrl, site, adsEnabled, adsenseScriptEnabled, analyticsEnabled, gaInitScript } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
 
 const fill = (html, head) => template.replace('<!--app-head-->', head).replace('<!--app-html-->', html);
 const outFile = (p) => (p === '/' ? join(dist, 'index.html') : join(dist, `${p.slice(1)}.html`));
@@ -60,6 +61,11 @@ if (site.adsenseClient) {
   await writeFile(join(dist, 'ads.txt'), `google.com, ${site.adsenseClient.replace(/^ca-/, '')}, DIRECT, f08c47fec0942fa0\n`);
 }
 
+// ga-init.js: GA4 consent defaults + config, loaded by every indexable page.
+if (analyticsEnabled) {
+  await writeFile(join(dist, 'ga-init.js'), gaInitScript(site.gaMeasurementId));
+}
+
 // _headers — security headers and caching for Cloudflare Pages.
 // Google's ad code loads scripts, frames and beacons from many Google-owned
 // hosts (including country domains such as adservice.google.co.nz), so when
@@ -74,6 +80,20 @@ const csp = adsenseScriptEnabled
       "font-src 'self'",
       "connect-src 'self' https:",
       "frame-src https:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+    ].join('; ')
+  : analyticsEnabled
+  ? [
+      // Google Analytics only (AdSense switched off): Google's documented GA4 hosts.
+      "default-src 'self'",
+      "script-src 'self' https://www.googletagmanager.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' blob: data: https:",
+      "font-src 'self'",
+      "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -121,6 +141,6 @@ await writeFile(join(dist, '_headers'), headers);
 
 await rm(ssrDir, { recursive: true, force: true });
 console.log(
-  `Prerendered ${count} routes + 404.html; wrote sitemap.xml, robots.txt, _headers${site.adsenseClient ? ', ads.txt' : ''}. AdSense script ${adsenseScriptEnabled ? 'ON' : 'off'}; ad units ${adsEnabled ? 'ENABLED' : 'off (no slot ID)'}.`,
+  `Prerendered ${count} routes + 404.html; wrote sitemap.xml, robots.txt, _headers${site.adsenseClient ? ', ads.txt' : ''}${analyticsEnabled ? ', ga-init.js' : ''}. GA4 ${analyticsEnabled ? site.gaMeasurementId : 'off'}; AdSense script ${adsenseScriptEnabled ? 'ON' : 'off'}; ad units ${adsEnabled ? 'ENABLED' : 'off (no slot ID)'}.`,
 );
 if (!site.contactEmail) console.warn('WARNING: VITE_CONTACT_EMAIL is not set — the contact page has no address (needed before AdSense review).');
