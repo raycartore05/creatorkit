@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { drawImageOnto, type LoadedImage } from '../lib/image';
 import { computeDrawRect, dragToOffset, type FitMode, type Placement } from '../lib/layout';
 
@@ -40,6 +40,13 @@ export function PlacementEditor({
   const boxRef = useRef<HTMLDivElement>(null);
   const [boxW, setBoxW] = useState(maxPreview);
   const drag = useRef<{ x: number; y: number; start: Placement } | null>(null);
+
+  // Measure the container before the first paint so the preview never starts
+  // wider than the screen (it previously drew at maxPreview for one frame).
+  useLayoutEffect(() => {
+    const w = boxRef.current?.clientWidth;
+    if (w) setBoxW(Math.min(maxPreview, w));
+  }, [maxPreview]);
 
   useEffect(() => {
     const el = boxRef.current;
@@ -131,7 +138,8 @@ export function PlacementEditor({
 
   return (
     <div ref={boxRef} className="w-full">
-      <div className="checker cropmarks mx-auto rounded-sm" style={{ width: pw, height: ph }}>
+      {/* max-width + aspect-ratio: a hard cap so the preview can't exceed its container, even before measuring. */}
+      <div className="checker cropmarks mx-auto rounded-sm" style={{ width: pw, maxWidth: '100%', aspectRatio: `${pw} / ${ph}` }}>
         <canvas
           ref={canvasRef}
           data-testid="preview-canvas"
@@ -144,7 +152,7 @@ export function PlacementEditor({
           onPointerCancel={onUp}
           onKeyDown={onKey}
           className={`block touch-none ${canPan ? 'cursor-grab active:cursor-grabbing' : ''}`}
-          style={{ width: pw, height: ph }}
+          style={{ width: '100%', height: '100%' }}
         />
       </div>
       <p className="mt-2 text-center text-xs text-muted">
